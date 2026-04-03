@@ -1,26 +1,24 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from assistant.audit.service import log_event
 from assistant.db.models import MemoryRecord
 from assistant.db.vector import encode_embedding, search_similar
-from assistant.memory.dedup import detect_duplicate
 from assistant.memory.embeddings import generate_embedding
 from assistant.memory.schemas import (
     DeleteFilter,
     DeleteResult,
     DuplicateResult,
-    MemoryCandidateIn,
     MemoryCandidateOut,
     MemoryRecordOut,
 )
-from assistant.telemetry.setup import get_tracer, get_meter
+from assistant.telemetry.setup import get_meter, get_tracer
 
 _tracer = get_tracer("memory")
 _meter = get_meter("memory")
@@ -50,7 +48,7 @@ async def create_candidate(
         "source_ref": source_ref,
         "metadata": metadata or {},
         "sensitivity_class": sensitivity_class,
-        "created_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
     }
     return MemoryCandidateOut(
         candidate_id=candidate_id,
@@ -138,7 +136,7 @@ async def delete_memories(
     session: AsyncSession, filter: DeleteFilter
 ) -> DeleteResult:
     """Soft-delete memory records matching the filter."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     stmt = select(MemoryRecord).where(MemoryRecord.deleted_at.is_(None))
 
     if filter.memory_id:

@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from assistant.config import Settings
 from assistant.conversation.session import get_history
 from assistant.notes.schemas import GeneratedNotes
-from assistant.policy.guard import PolicyContext, evaluate as policy_evaluate
+from assistant.policy.guard import PolicyContext
+from assistant.policy.guard import evaluate as policy_evaluate
 from assistant.routing import router as model_router
 
 _NOTES_PROMPT = """\

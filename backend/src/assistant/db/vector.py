@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import struct
-from typing import Sequence
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession

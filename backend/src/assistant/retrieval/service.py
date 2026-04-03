@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assistant.db.models import MemoryRecord
 from assistant.db.vector import search_similar
 from assistant.memory.embeddings import generate_embedding
 from assistant.retrieval.reranker import combined_score
@@ -16,7 +14,7 @@ from assistant.retrieval.schemas import (
     RetrievalResult,
     SourceAttribution,
 )
-from assistant.telemetry.setup import get_tracer, get_meter
+from assistant.telemetry.setup import get_meter, get_tracer
 
 _tracer = get_tracer("retrieval")
 _meter = get_meter("retrieval")
@@ -98,7 +96,7 @@ async def _query(
         if isinstance(created_at, str):
             created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
         if created_at.tzinfo is None:
-            created_at = created_at.replace(tzinfo=timezone.utc)
+            created_at = created_at.replace(tzinfo=UTC)
         source = SourceAttribution(
             memory_id=str(item["memory_id"]),
             source_type=str(item["source_type"]),

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from datetime import datetime, timezone
+from datetime import timezone, UTC
 
 from assistant.integrations.apple_notes.schemas import RawNote
 
@@ -84,7 +84,7 @@ def fetch_notes(folder: str | None = None) -> list[RawNote]:
                 from dateutil import parser as dateutil_parser
                 modified_at = dateutil_parser.parse(modified_at_str)
                 if modified_at.tzinfo is None:
-                    modified_at = modified_at.replace(tzinfo=timezone.utc)
+                    modified_at = modified_at.replace(tzinfo=UTC)
             except Exception:
                 modified_at = None
         notes.append(

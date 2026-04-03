@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock
 
 from assistant.config import Settings
-from assistant.policy.guard import PolicyContext, evaluate as policy_evaluate
+from assistant.policy.guard import PolicyContext
+from assistant.policy.guard import evaluate as policy_evaluate
 from assistant.routing import router as model_router
 from assistant.tasks.schemas import TaskIntent
 

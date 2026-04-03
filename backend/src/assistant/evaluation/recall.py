@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from assistant.db.vector import search_similar
 from assistant.evaluation.schemas import EvalCase, RecallMetrics
 from assistant.memory.embeddings import generate_embedding
-from assistant.db.vector import search_similar
 
 
 async def evaluate_recall(

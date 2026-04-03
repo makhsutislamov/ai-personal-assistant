@@ -86,7 +86,7 @@ async def verify_chain(
             "before_state": None,
             "after_state": None,
         }
-        expected = _compute_hash(previous_hash, event_data)
+        _compute_hash(previous_hash, event_data)  # computed for reference
         # The stored after_hash must match what we'd compute using stored before_hash
         recomputed = _compute_hash(event.before_hash, event_data)
         if event.after_hash != recomputed:

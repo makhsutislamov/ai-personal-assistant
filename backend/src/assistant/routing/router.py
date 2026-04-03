@@ -3,12 +3,11 @@ from __future__ import annotations
 import time
 import uuid
 from collections import deque
-from typing import Protocol
 
 from assistant.config import Settings
 from assistant.policy.guard import PolicyDecision
 from assistant.routing.schemas import ModelResponse
-from assistant.telemetry.setup import get_tracer, get_meter
+from assistant.telemetry.setup import get_meter, get_tracer
 
 _tracer = get_tracer("routing")
 _meter = get_meter("routing")
@@ -55,7 +54,8 @@ async def invoke(
     request_id: str | None = None,
 ) -> ModelResponse:
     """Route prompt to the appropriate model provider."""
-    from assistant.routing.providers import azure_openai_provider, ollama as ollama_provider
+    from assistant.routing.providers import azure_openai_provider
+    from assistant.routing.providers import ollama as ollama_provider
 
     if request_id is None:
         request_id = str(uuid.uuid4())

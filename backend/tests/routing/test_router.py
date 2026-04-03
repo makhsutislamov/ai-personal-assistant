@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from assistant.config import Settings
 from assistant.policy.guard import PolicyDecision

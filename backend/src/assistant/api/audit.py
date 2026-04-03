@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from assistant.audit import service as audit_service
-from assistant.audit.schemas import AuditEventOut, AuditQuery
+from assistant.audit.schemas import AuditEventOut
 from assistant.db.models import AuditEvent
 
 router = APIRouter(tags=["audit"])

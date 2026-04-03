@@ -1,26 +1,20 @@
 from __future__ import annotations
 
-import hashlib
-import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 from sqlalchemy import (
-    JSON,
-    Boolean,
     DateTime,
     Float,
     Index,
-    Integer,
     LargeBinary,
     String,
     Text,
-    func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Base(DeclarativeBase):

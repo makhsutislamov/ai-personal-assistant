@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone, UTC
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -95,7 +95,7 @@ async def test_delete_by_source_type(db_session: AsyncSession):
 
 async def test_delete_by_time_before(db_session: AsyncSession):
     await memory_service.auto_ingest(db_session, "old content", "conversation")
-    future_cutoff = datetime.now(timezone.utc) + timedelta(minutes=1)
+    future_cutoff = datetime.now(UTC) + timedelta(minutes=1)
 
     result = await memory_service.delete_memories(
         db_session, DeleteFilter(time_before=future_cutoff)

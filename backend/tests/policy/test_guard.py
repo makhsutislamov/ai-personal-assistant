@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from assistant.policy.guard import PolicyContext, evaluate
 
 

@@ -8,7 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from assistant.db.engine import create_engine, create_session_factory
 from assistant.db.migrations import run_migrations
 from assistant.db.models import MemoryRecord
-from assistant.db.vector import cosine_similarity, decode_embedding, encode_embedding, search_similar
+from assistant.db.vector import (
+    cosine_similarity,
+    decode_embedding,
+    encode_embedding,
+    search_similar,
+)
+from datetime import UTC
 
 
 @pytest.fixture
@@ -93,7 +99,7 @@ async def test_search_excludes_deleted(db_session: AsyncSession):
         source_type="conversation",
         canonical_text="deleted",
         embedding=encode_embedding([1.0, 0.0]),
-        deleted_at=datetime.now(timezone.utc),
+        deleted_at=datetime.now(UTC),
     )
     db_session.add(active)
     db_session.add(deleted)

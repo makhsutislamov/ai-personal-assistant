@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 
@@ -12,8 +11,9 @@ def test_azure_openai_complete():
         mock_client = mock_cls.return_value
         mock_client.chat.completions.create.return_value = mock_response
 
-        from assistant.routing.providers.azure_openai_provider import complete
         import asyncio
+
+        from assistant.routing.providers.azure_openai_provider import complete
 
         text, latency = asyncio.get_event_loop().run_until_complete(
             complete(
@@ -40,8 +40,9 @@ def test_azure_openai_empty_response():
         mock_client = mock_cls.return_value
         mock_client.chat.completions.create.return_value = mock_response
 
-        from assistant.routing.providers.azure_openai_provider import complete
         import asyncio
+
+        from assistant.routing.providers.azure_openai_provider import complete
 
         text, _ = asyncio.get_event_loop().run_until_complete(
             complete(

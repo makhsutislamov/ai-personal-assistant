@@ -4,7 +4,7 @@ import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from assistant.db.models import Base, MemoryRecord
 from assistant.db.vector import encode_embedding

@@ -4,7 +4,6 @@ import pytest
 
 from assistant.policy.detector import detect_sensitive
 
-
 # ---- Positive cases (should be detected as sensitive) ----
 
 @pytest.mark.parametrize("text", [

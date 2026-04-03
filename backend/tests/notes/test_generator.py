@@ -3,10 +3,7 @@ from __future__ import annotations
 import json
 from unittest.mock import AsyncMock, patch
 
-import pytest
-
 from assistant.notes.generator import _parse_notes, generate_notes
-from assistant.notes.schemas import GeneratedNotes
 
 
 def test_parse_valid_json():
@@ -52,6 +49,7 @@ def test_parse_missing_fields_defaults_to_empty():
 
 async def test_generate_notes_with_populated_session():
     from unittest.mock import MagicMock
+
     from assistant.config import Settings
 
     # Mock session with messages
@@ -84,6 +82,7 @@ async def test_generate_notes_with_populated_session():
 
 async def test_generate_notes_empty_session():
     from unittest.mock import MagicMock
+
     from assistant.config import Settings
 
     mock_session = MagicMock()

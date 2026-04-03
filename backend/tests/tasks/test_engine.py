@@ -43,7 +43,7 @@ async def test_valid_state_transition(db_session: AsyncSession):
 
 async def test_complete_task(db_session: AsyncSession):
     task = await task_engine.create_task(db_session, "Send report")
-    in_progress = await task_engine.update_task(db_session, task.task_id, "in_progress")
+    in_progress = await task_engine.update_task(db_session, task.task_id, "in_progress")  # noqa: F841
     completed = await task_engine.update_task(
         db_session, task.task_id, "completed", outcome="Report sent successfully"
     )

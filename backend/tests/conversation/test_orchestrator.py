@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,6 +67,7 @@ async def test_respond_reuses_existing_session(db_session: AsyncSession):
 async def test_grounded_response_when_context_retrieved(db_session: AsyncSession):
     """When memory items exist, response should be marked grounded."""
     import uuid as _uuid
+
     from assistant.db.models import MemoryRecord
     from assistant.db.vector import encode_embedding
 

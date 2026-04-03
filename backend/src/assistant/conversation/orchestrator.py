@@ -4,12 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from assistant.config import Settings
 from assistant.conversation.prompt_builder import build_prompt
-from assistant.conversation.schemas import ChatResponse, ChatRequest, SourceAttribution
+from assistant.conversation.schemas import ChatRequest, ChatResponse, SourceAttribution
 from assistant.conversation.session import append_message, get_history, get_or_create_session
-from assistant.policy.guard import PolicyContext, evaluate as policy_evaluate
+from assistant.policy.guard import PolicyContext
+from assistant.policy.guard import evaluate as policy_evaluate
 from assistant.retrieval import service as retrieval_service
 from assistant.routing import router as model_router
-from assistant.telemetry.setup import get_tracer, get_meter
+from assistant.telemetry.setup import get_meter, get_tracer
 
 _tracer = get_tracer("conversation")
 _meter = get_meter("conversation")

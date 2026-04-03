@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # ---- Pattern definitions (one per sensitivity category) ----
 # Each entry: (label, compiled_pattern)

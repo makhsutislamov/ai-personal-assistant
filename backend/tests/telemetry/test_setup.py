@@ -2,8 +2,7 @@ from __future__ import annotations
 
 
 def test_setup_telemetry_creates_providers():
-    from opentelemetry import trace, metrics
-    from assistant.telemetry.setup import setup_telemetry, get_tracer, get_meter
+    from assistant.telemetry.setup import get_meter, get_tracer, setup_telemetry
 
     setup_telemetry(export_to_console=False)
 
@@ -15,7 +14,6 @@ def test_setup_telemetry_creates_providers():
 
 
 def test_get_tracer_returns_tracer():
-    from opentelemetry.sdk.trace import Tracer
     from assistant.telemetry.setup import get_tracer
 
     tracer = get_tracer("test-service")
@@ -30,8 +28,7 @@ def test_get_meter_returns_meter():
 
 
 def test_tracer_creates_spans():
-    from assistant.telemetry.setup import setup_telemetry, get_tracer
-    from opentelemetry import trace
+    from assistant.telemetry.setup import get_tracer, setup_telemetry
 
     setup_telemetry()
     tracer = get_tracer("span-test")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import statistics
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

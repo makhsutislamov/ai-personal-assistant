@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 
 def _recency_decay(created_at: datetime | str, half_life_days: float = 30.0) -> float:
@@ -9,8 +9,8 @@ def _recency_decay(created_at: datetime | str, half_life_days: float = 30.0) -> 
     if isinstance(created_at, str):
         created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
     if created_at.tzinfo is None:
-        created_at = created_at.replace(tzinfo=timezone.utc)
-    now = datetime.now(timezone.utc)
+        created_at = created_at.replace(tzinfo=UTC)
+    now = datetime.now(UTC)
     age_days = (now - created_at).total_seconds() / 86400
     return math.exp(-age_days * math.log(2) / half_life_days)
 

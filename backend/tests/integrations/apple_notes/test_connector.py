@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -95,6 +95,7 @@ async def test_disconnect_revokes_consent(db_session: AsyncSession):
     await apple_connector.disconnect(db_session)
     # After disconnect, connect status should be revoked
     from sqlalchemy import select
+
     from assistant.db.models import SourceDocument
 
     result = await db_session.execute(

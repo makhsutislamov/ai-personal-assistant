@@ -66,7 +66,6 @@ async def save_session_notes(
     session: AsyncSession = Depends(_get_session),
 ) -> None:
     from assistant.memory import service as memory_service
-    import json
 
     content = f"Summary: {body.notes.summary}\n"
     if body.notes.decisions:

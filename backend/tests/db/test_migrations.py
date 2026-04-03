@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import pytest
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect
 
 from assistant.db.engine import create_engine
 from assistant.db.migrations import run_migrations
-from assistant.db.models import Base
 
 
 async def test_all_tables_created():

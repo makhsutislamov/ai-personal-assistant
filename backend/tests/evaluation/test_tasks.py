@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, timedelta
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from assistant.db.models import Base, TaskRecord
 from assistant.evaluation.tasks import compute_task_completion

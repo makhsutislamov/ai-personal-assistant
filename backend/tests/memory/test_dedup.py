@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from assistant.memory.dedup import detect_duplicate
 
 

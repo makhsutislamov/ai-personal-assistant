@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from assistant.db.models import Base
 from assistant.audit import service as audit_service
+from assistant.db.models import Base
 
 
 @pytest.fixture
@@ -58,6 +58,7 @@ async def test_verify_chain_empty_is_valid(session: AsyncSession):
 
 async def test_verify_chain_detects_tamper(session: AsyncSession):
     from sqlalchemy import select
+
     from assistant.db.models import AuditEvent
 
     await audit_service.log_event(session, "create", "task", "t-1", None, {})

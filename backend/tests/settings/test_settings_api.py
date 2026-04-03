@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from assistant.api.settings import (
+    SettingPatch,
+    _upsert,
+    get_settings,
+    set_memory_mode,
+    set_model_routing,
+    set_retrieval,
+)
 from assistant.db.models import Base
-from assistant.api.settings import _upsert, get_settings, set_memory_mode, set_model_routing, set_retrieval, SettingPatch
 
 
 @pytest.fixture

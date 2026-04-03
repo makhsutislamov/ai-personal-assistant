@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
-from assistant.policy.detector import SensitiveMatch, detect_sensitive
+from assistant.policy.detector import detect_sensitive
 from assistant.telemetry.setup import get_tracer
 
 _tracer = get_tracer("policy")

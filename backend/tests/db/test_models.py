@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 
 import pytest
-from sqlalchemy import inspect, select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from assistant.db.engine import create_engine, create_session_factory

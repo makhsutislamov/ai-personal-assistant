@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import pytest
+from datetime import datetime, timezone, UTC
 from unittest.mock import MagicMock
 
 from assistant.conversation.prompt_builder import build_prompt
 from assistant.retrieval.schemas import RetrievalItem, SourceAttribution
-from datetime import datetime, timezone
 
 
 def _make_retrieval_item(snippet: str) -> RetrievalItem:
@@ -14,7 +13,7 @@ def _make_retrieval_item(snippet: str) -> RetrievalItem:
         source_type="conversation",
         title="",
         snippet=snippet,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     return RetrievalItem(memory_id="id-1", score=0.9, snippet=snippet, source=source)
 
