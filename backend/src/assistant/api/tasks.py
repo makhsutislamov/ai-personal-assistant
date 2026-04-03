@@ -4,14 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from assistant.deps import get_session
 from assistant.tasks import engine as task_engine
 from assistant.tasks.schemas import TaskOut
 
 router = APIRouter(tags=["tasks"])
-
-
-async def _get_session() -> AsyncSession:  # type: ignore[return]
-    raise NotImplementedError("DB session dependency not configured")
 
 
 class CreateTaskRequest(BaseModel):
@@ -28,7 +25,7 @@ class UpdateTaskRequest(BaseModel):
 @router.post("/tasks", response_model=TaskOut, status_code=201)
 async def create_task(
     body: CreateTaskRequest,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> TaskOut:
     return await task_engine.create_task(
         session=session,
@@ -41,7 +38,7 @@ async def create_task(
 async def update_task(
     task_id: str,
     body: UpdateTaskRequest,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> TaskOut:
     try:
         return await task_engine.update_task(
@@ -58,7 +55,7 @@ async def update_task(
 @router.get("/tasks", response_model=list[TaskOut])
 async def list_tasks(
     status: str | None = None,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> list[TaskOut]:
     return await task_engine.list_tasks(session=session, status_filter=status)
 

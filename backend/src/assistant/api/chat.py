@@ -7,14 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from assistant.config import Settings, get_settings
 from assistant.conversation import orchestrator
 from assistant.conversation.schemas import ChatRequest, ChatResponse
+from assistant.deps import get_session
 from assistant.notes.generator import generate_notes
 from assistant.notes.schemas import GeneratedNotes
 
 router = APIRouter(tags=["chat"])
-
-
-async def _get_session() -> AsyncSession:  # type: ignore[return]
-    raise NotImplementedError("DB session dependency not configured")
 
 
 class SessionTranscript(BaseModel):
@@ -30,7 +27,7 @@ class SaveNotesRequest(BaseModel):
 @router.post("/chat/respond", response_model=ChatResponse)
 async def chat_respond(
     body: ChatRequest,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ) -> ChatResponse:
     return await orchestrator.respond(session, body, settings)
@@ -39,7 +36,7 @@ async def chat_respond(
 @router.get("/chat/sessions/{session_id}", response_model=SessionTranscript)
 async def get_session(
     session_id: str,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> SessionTranscript:
     from assistant.conversation.session import get_history
 
@@ -53,7 +50,7 @@ async def get_session(
 @router.post("/chat/sessions/{session_id}/notes", response_model=GeneratedNotes)
 async def generate_session_notes(
     session_id: str,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ) -> GeneratedNotes:
     return await generate_notes(session, session_id, settings)
@@ -63,7 +60,7 @@ async def generate_session_notes(
 async def save_session_notes(
     session_id: str,
     body: SaveNotesRequest,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> None:
     from assistant.memory import service as memory_service
 

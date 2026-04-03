@@ -7,21 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from assistant.audit import service as audit_service
 from assistant.audit.schemas import AuditEventOut
 from assistant.db.models import AuditEvent
+from assistant.deps import get_session
 
 router = APIRouter(tags=["audit"])
 
 
-async def _get_session() -> AsyncSession:  # pragma: no cover
-    raise NotImplementedError("Wire up real session factory at startup")
-
-
-@router.get("/v1/audit/events", response_model=list[AuditEventOut])
+@router.get("/audit/events", response_model=list[AuditEventOut])
 async def list_audit_events(
     actor: str | None = None,
     action_type: str | None = None,
     target_type: str | None = None,
     target_id: str | None = None,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> list[AuditEventOut]:
     stmt = select(AuditEvent).order_by(AuditEvent.created_at.desc())
     if actor:
@@ -52,9 +49,9 @@ async def list_audit_events(
     return out
 
 
-@router.get("/v1/audit/integrity")
+@router.get("/audit/integrity")
 async def check_integrity(
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
     return await audit_service.verify_chain(session)
 

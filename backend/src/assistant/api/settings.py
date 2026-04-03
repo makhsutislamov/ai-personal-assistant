@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from assistant.audit import service as audit_service
 from assistant.db.models import UserSettings
+from assistant.deps import get_session
 
 router = APIRouter(tags=["settings"])
 
@@ -16,10 +17,6 @@ _ALLOWED_KEYS = {
     "retrieval_top_k",
     "sensitive_local_only",
 }
-
-
-async def _get_session() -> AsyncSession:  # pragma: no cover
-    raise NotImplementedError("Wire up real session factory at startup")
 
 
 class SettingsResponse(BaseModel):
@@ -53,19 +50,19 @@ async def _upsert(
     await session.commit()
 
 
-@router.get("/v1/settings", response_model=SettingsResponse)
+@router.get("/settings", response_model=SettingsResponse)
 async def get_settings(
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> SettingsResponse:
     result = await session.execute(select(UserSettings))
     rows = result.scalars().all()
     return SettingsResponse(settings={r.key: r.value for r in rows})
 
 
-@router.patch("/v1/settings/memory-mode", response_model=SettingsResponse)
+@router.patch("/settings/memory-mode", response_model=SettingsResponse)
 async def set_memory_mode(
     body: SettingPatch,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> SettingsResponse:
     if body.value not in ("ask", "auto", "manual"):
         from fastapi import HTTPException
@@ -74,10 +71,10 @@ async def set_memory_mode(
     return await get_settings(session)
 
 
-@router.patch("/v1/settings/model-routing", response_model=SettingsResponse)
+@router.patch("/settings/model-routing", response_model=SettingsResponse)
 async def set_model_routing(
     body: SettingPatch,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> SettingsResponse:
     if body.value not in ("azure_openai", "ollama", "auto"):
         from fastapi import HTTPException
@@ -86,10 +83,10 @@ async def set_model_routing(
     return await get_settings(session)
 
 
-@router.patch("/v1/settings/retrieval", response_model=SettingsResponse)
+@router.patch("/settings/retrieval", response_model=SettingsResponse)
 async def set_retrieval(
     body: SettingPatch,
-    session: AsyncSession = Depends(_get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> SettingsResponse:
     try:
         int(body.value)

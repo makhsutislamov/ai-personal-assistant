@@ -10,6 +10,17 @@ export class SidecarManager {
   private process: ChildProcess | null = null;
 
   async start(): Promise<void> {
+    // If backend is already running (e.g. from a terminal), skip spawning.
+    try {
+      const res = await fetch(`http://127.0.0.1:${this.port}/health`);
+      if (res.ok) {
+        console.log("[sidecar] Backend already running, skipping spawn.");
+        return;
+      }
+    } catch {
+      // not running yet — proceed to spawn below
+    }
+
     const pythonPath = this.resolvePythonPath();
     this.process = spawn(pythonPath, [
       "-m",
@@ -59,7 +70,7 @@ export class SidecarManager {
 
   private resolvePythonPath(): string {
     const candidates = [
-      path.join(__dirname, "../../backend/.venv/bin/python"),
+      path.join(__dirname, "../../../backend/.venv/bin/python"),
       "python3",
       "python",
     ];
@@ -75,6 +86,6 @@ export class SidecarManager {
   }
 
   private resolveSrcPath(): string {
-    return path.join(__dirname, "../../backend/src");
+    return path.join(__dirname, "../../../backend/src");
   }
 }
