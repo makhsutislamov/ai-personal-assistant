@@ -39,8 +39,10 @@ async def log_event(
         "target_type": target_type,
         "target_id": target_id,
         "actor": actor,
-        "before_state": before_state,
-        "after_state": after_state,
+        # State payloads are not persisted in DB, so omit from hash
+        # to keep verify_chain reproducible without them.
+        "before_state": None,
+        "after_state": None,
     }
     after_hash = _compute_hash(previous_hash, event_data)
 
