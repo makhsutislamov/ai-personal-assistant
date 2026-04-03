@@ -4,6 +4,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from assistant.policy.detector import SensitiveMatch, detect_sensitive
+from assistant.telemetry.setup import get_tracer
+
+_tracer = get_tracer("policy")
 
 
 @dataclass
@@ -22,6 +25,15 @@ class PolicyDecision:
 
 async def evaluate(content: str, context: PolicyContext) -> PolicyDecision:
     """Evaluate whether content may be sent to a remote model."""
+    with _tracer.start_as_current_span("policy.evaluate") as span:
+        span.set_attribute("source_type", context.source_type)
+        decision = await _evaluate(content, context)
+        span.set_attribute("sensitivity_class", decision.sensitivity_class)
+        span.set_attribute("allowed_remote", decision.allowed_remote)
+        return decision
+
+
+async def _evaluate(content: str, context: PolicyContext) -> PolicyDecision:
     if not context.consent_granted:
         return PolicyDecision(
             allowed_remote=False,

@@ -20,6 +20,14 @@ from assistant.memory.schemas import (
     MemoryCandidateOut,
     MemoryRecordOut,
 )
+from assistant.telemetry.setup import get_tracer, get_meter
+
+_tracer = get_tracer("memory")
+_meter = get_meter("memory")
+_memory_ops = _meter.create_counter(
+    "assistant.memory.operations",
+    description="Count of memory operations by type and mode",
+)
 
 # In-memory store for pending candidates (ask/manual mode)
 _pending_candidates: dict[str, dict[str, Any]] = {}
@@ -34,6 +42,7 @@ async def create_candidate(
     source_ref: str | None = None,
 ) -> MemoryCandidateOut:
     """Create a pending memory candidate (for ask/manual mode)."""
+    _memory_ops.add(1, {"operation": "create_candidate", "mode": "ask"})
     candidate_id = str(uuid.uuid4())
     _pending_candidates[candidate_id] = {
         "content": content,

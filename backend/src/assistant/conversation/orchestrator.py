@@ -9,6 +9,15 @@ from assistant.conversation.session import append_message, get_history, get_or_c
 from assistant.policy.guard import PolicyContext, evaluate as policy_evaluate
 from assistant.retrieval import service as retrieval_service
 from assistant.routing import router as model_router
+from assistant.telemetry.setup import get_tracer, get_meter
+
+_tracer = get_tracer("conversation")
+_meter = get_meter("conversation")
+_chat_latency = _meter.create_histogram(
+    "assistant.chat.latency",
+    description="End-to-end chat response latency in ms",
+    unit="ms",
+)
 
 
 async def respond(
@@ -17,6 +26,21 @@ async def respond(
     settings: Settings,
 ) -> ChatResponse:
     """Process a chat request end-to-end."""
+    import time
+    _t0 = time.perf_counter()
+    with _tracer.start_as_current_span("conversation.respond") as span:
+        span.set_attribute("session_id", request.session_id or "")
+        span.set_attribute("message_length", len(request.message))
+        result = await _respond_inner(session, request, settings)
+        _chat_latency.record((time.perf_counter() - _t0) * 1000)
+        return result
+
+
+async def _respond_inner(
+    session: AsyncSession,
+    request: ChatRequest,
+    settings: Settings,
+) -> ChatResponse:
     session_id = await get_or_create_session(session, request.session_id)
 
     # Retrieve relevant context

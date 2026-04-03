@@ -16,6 +16,15 @@ from assistant.retrieval.schemas import (
     RetrievalResult,
     SourceAttribution,
 )
+from assistant.telemetry.setup import get_tracer, get_meter
+
+_tracer = get_tracer("retrieval")
+_meter = get_meter("retrieval")
+_retrieval_latency = _meter.create_histogram(
+    "assistant.retrieval.latency",
+    description="Retrieval query latency in ms",
+    unit="ms",
+)
 
 
 async def query(
@@ -25,6 +34,20 @@ async def query(
     top_k: int = 10,
 ) -> RetrievalResult:
     """Retrieve and rank relevant memory records for the given query."""
+    with _tracer.start_as_current_span("retrieval.query") as span:
+        span.set_attribute("top_k", top_k)
+        result = await _query(session, text, filters, top_k)
+        span.set_attribute("items_returned", len(result.items))
+        _retrieval_latency.record(result.query_latency_ms)
+        return result
+
+
+async def _query(
+    session: AsyncSession,
+    text: str,
+    filters: RetrievalFilter | None = None,
+    top_k: int = 10,
+) -> RetrievalResult:
     start = time.perf_counter()
 
     embedding = await generate_embedding(text)

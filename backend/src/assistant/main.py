@@ -3,8 +3,12 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from assistant.telemetry.setup import setup_telemetry
+
 
 def create_app() -> FastAPI:
+    setup_telemetry()
+
     app = FastAPI(
         title="AI Personal Assistant",
         version="0.1.0",
@@ -18,6 +22,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    from assistant.telemetry.middleware import TelemetryMiddleware
+    app.add_middleware(TelemetryMiddleware)
 
     @app.get("/health")
     async def health() -> dict[str, str]:

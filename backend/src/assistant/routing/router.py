@@ -8,6 +8,14 @@ from typing import Protocol
 from assistant.config import Settings
 from assistant.policy.guard import PolicyDecision
 from assistant.routing.schemas import ModelResponse
+from assistant.telemetry.setup import get_tracer, get_meter
+
+_tracer = get_tracer("routing")
+_meter = get_meter("routing")
+_routing_decisions = _meter.create_counter(
+    "assistant.routing.decisions",
+    description="Count of routing decisions by provider and sensitivity class",
+)
 
 # Circuit breaker config
 _CB_FAILURE_THRESHOLD = 3
@@ -87,6 +95,13 @@ async def invoke(
             else:
                 raise
 
+    _routing_decisions.add(
+        1,
+        {
+            "provider": provider,
+            "sensitivity_class": policy_decision.sensitivity_class,
+        },
+    )
     return ModelResponse(
         text=text,
         model_used=model_used,
