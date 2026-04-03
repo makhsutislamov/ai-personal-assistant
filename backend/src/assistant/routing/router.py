@@ -68,9 +68,9 @@ async def invoke(
 
     if use_ollama:
         try:
-            text, latency_ms = await ollama_provider.complete(prompt)
+            text, latency_ms = await ollama_provider.complete(prompt, model=settings.ollama_chat_model)
             provider = "ollama"
-            model_used = "llama3"
+            model_used = settings.ollama_chat_model
         except Exception:
             raise
     else:
@@ -89,9 +89,9 @@ async def invoke(
             _azure_cb.record_failure()
             if _azure_cb.is_open():
                 # Fallback to Ollama
-                text, latency_ms = await ollama_provider.complete(prompt)
+                text, latency_ms = await ollama_provider.complete(prompt, model=settings.ollama_chat_model)
                 provider = "ollama"
-                model_used = "llama3"
+                model_used = settings.ollama_chat_model
             else:
                 raise
 

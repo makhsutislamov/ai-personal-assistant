@@ -21,6 +21,7 @@ def test_azure_openai_complete():
                 endpoint="https://example.openai.azure.com",
                 api_key="test-key",
                 deployment="gpt-4o",
+                api_version="2024-02-01",
             )
         )
 
@@ -50,6 +51,7 @@ def test_azure_openai_empty_response():
                 endpoint="https://example.openai.azure.com",
                 api_key="key",
                 deployment="gpt-4o",
+                api_version="2024-02-01",
             )
         )
 

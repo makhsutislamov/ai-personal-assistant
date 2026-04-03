@@ -13,10 +13,12 @@ class Settings(BaseSettings):
     )
 
     memory_mode: Literal["auto", "ask", "manual"] = "ask"
-    routing_preference: Literal["azure_openai", "ollama"] = "azure_openai"
+    routing_preference: Literal["azure_openai", "ollama"] = "ollama"
     sensitive_local_only: bool = True
 
     ollama_base_url: str = "http://localhost:11434"
+    ollama_chat_model: str = "llama3.2"
+    ollama_embedding_model: str = "all-minilm"
 
     azure_openai_endpoint: str = ""
     azure_openai_api_key: str = ""

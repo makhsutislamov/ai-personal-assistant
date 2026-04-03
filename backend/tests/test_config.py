@@ -9,9 +9,11 @@ from assistant.config import Settings
 def test_defaults():
     s = Settings()
     assert s.memory_mode == "ask"
-    assert s.routing_preference == "azure_openai"
+    assert s.routing_preference == "ollama"
     assert s.sensitive_local_only is True
     assert s.ollama_base_url == "http://localhost:11434"
+    assert s.ollama_chat_model == "llama3.2"
+    assert s.ollama_embedding_model == "all-minilm"
     assert s.azure_openai_api_version == "2024-02-01"
 
 

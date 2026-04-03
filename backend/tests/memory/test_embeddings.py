@@ -17,5 +17,5 @@ async def test_generate_embedding_shape():
 
     assert result == [0.1, 0.2, 0.3, 0.4]
     mock_instance.embeddings.assert_called_once_with(
-        model="nomic-embed-text", prompt="hello world"
+        model="all-minilm", prompt="hello world"
     )

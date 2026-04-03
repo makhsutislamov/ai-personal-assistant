@@ -42,7 +42,7 @@ async def test_respond_returns_chat_response(db_session: AsyncSession):
 
     assert response.session_id
     assert response.response == "Test response from model"
-    assert response.model_used == "llama3"
+    assert response.model_used == "llama3.2"
 
 
 async def test_respond_creates_new_session_when_none(db_session: AsyncSession):

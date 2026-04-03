@@ -10,7 +10,7 @@ async def complete(
     endpoint: str,
     api_key: str,
     deployment: str,
-    api_version: str = "2024-02-01",
+    api_version: str,
 ) -> tuple[str, float]:
     """Call Azure OpenAI API and return (text, latency_ms)."""
     client = AzureOpenAI(

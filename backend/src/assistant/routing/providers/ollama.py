@@ -5,7 +5,7 @@ import time
 import ollama
 
 
-async def complete(prompt: str, model: str = "llama3") -> tuple[str, float]:
+async def complete(prompt: str, model: str) -> tuple[str, float]:
     """Call Ollama chat API and return (text, latency_ms)."""
     start = time.perf_counter()
     response = await ollama.AsyncClient().chat(  # type: ignore[attr-defined]
