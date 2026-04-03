@@ -1,0 +1,13 @@
+appId: com.assistant.app
+productName: AI Personal Assistant
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+files:
+  - dist/**/*
+  - node_modules/**/*
+directories:
+  buildResources: resources
+  output: release
