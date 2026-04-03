@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    from assistant.api import chat, memory, retrieval, settings, tasks, audit, integrations
+    from assistant.api import chat, memory, retrieval, settings, tasks, audit, integrations, evaluation
 
     app.include_router(chat.router, prefix="/v1")
     app.include_router(memory.router, prefix="/v1")
@@ -39,5 +39,6 @@ def create_app() -> FastAPI:
     app.include_router(tasks.router, prefix="/v1")
     app.include_router(audit.router, prefix="/v1")
     app.include_router(integrations.router, prefix="/v1")
+    app.include_router(evaluation.router, prefix="/v1")
 
     return app
