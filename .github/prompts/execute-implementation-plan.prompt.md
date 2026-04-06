@@ -93,4 +93,4 @@ Perform a final review against the original implementation plan:
 - **Never edit a file without reading it first.**
 - **Never leave a task partially done** — complete it fully or explicitly block it with a reason.
 - **Never skip tests** because they are hard to write.
-- **One task at a time** — keep the todo list accurate and current throughout.
+- Keep the todo list accurate and current throughout.
