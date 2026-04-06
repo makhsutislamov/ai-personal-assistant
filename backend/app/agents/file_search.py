@@ -108,11 +108,12 @@ class FileSearchAgent(BaseAgent):
         return AgentMetadata(
             name="file_search",
             description=(
-                "Search the local filesystem for files matching a name or glob pattern. "
-                "Only call this tool when the user explicitly asks to find, search for, or "
-                "locate files on their computer. "
-                "Do NOT call this tool for greetings, general questions, or any message "
-                "that does not clearly request a file search."
+                "Search the local filesystem for files by name or glob pattern. "
+                "Use for requests like: 'find my resume', 'where is config.json', "
+                "'list all *.py files in ~/projects', 'search for notes.txt'. "
+                "Do NOT call for general questions, greetings, or anything unrelated to locating files. "
+                "Do NOT use pattern '*' with directory '/' — require a specific directory for broad patterns. "
+                "Returns file name, full path, size in bytes, and last-modified timestamp."
             ),
             parameters_schema={
                 "type": "object",

@@ -127,3 +127,15 @@ class TestFileSearchAgent:
 
         assert result.success is True
         assert any(f["name"] == "deep_file.txt" for f in result.data["files"])
+
+    def test_metadata_description_contains_aci_guidance(self, agent):
+        from app.agents.registry import AgentRegistry
+
+        registry = AgentRegistry()
+        registry.register(agent)
+        tools = registry.as_tools()
+
+        desc = tools[0]["function"]["description"]
+        assert "find my resume" in desc
+        assert "do not" in desc.lower()
+        assert "last-modified timestamp" in desc

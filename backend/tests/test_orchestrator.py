@@ -91,8 +91,9 @@ class TestOrchestrator:
 
     @pytest.mark.asyncio
     async def test_direct_response_yields_token_events(self, session_store, registry):
+        # content=None triggers the streaming path in _stream_direct so both tokens flow through
         provider = MockLLMProvider(
-            chat_response=ChatMessage(role="assistant", content="Hello world"),
+            chat_response=ChatMessage(role="assistant", content=None),
             stream_tokens=["Hello", " world"],
         )
         orch = Orchestrator(provider, registry, session_store)
@@ -119,10 +120,20 @@ class TestOrchestrator:
         )
         first_response = ChatMessage(role="assistant", content=None, tool_calls=[tool_call])
 
+        call_count = 0
+
+        async def side_effect(messages, tools=None):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return first_response
+            return ChatMessage(role="assistant", content="Found 1 Python file.")
+
         provider = MockLLMProvider(
             chat_response=first_response,
             stream_tokens=["Found 1 Python file."],
         )
+        provider.chat_completion = side_effect
         orch = Orchestrator(provider, registry, session_store)
         session_id = session_store.create_session()
 
@@ -138,6 +149,7 @@ class TestOrchestrator:
         assert any(e.status == "complete" for e in agent_events)
         assert len(result_events) == 1
         assert result_events[0].data == file_data
+        # Synthesis result yielded as single token from _stream_direct
         assert len(token_events) == 1
         assert len(done_events) == 1
 
@@ -166,10 +178,20 @@ class TestOrchestrator:
         )
         first_response = ChatMessage(role="assistant", content=None, tool_calls=[tool_call])
 
+        call_count = 0
+
+        async def side_effect(messages, tools=None):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return first_response
+            return ChatMessage(role="assistant", content="I couldn't complete that.")
+
         provider = MockLLMProvider(
             chat_response=first_response,
             stream_tokens=["I couldn't complete that."],
         )
+        provider.chat_completion = side_effect
         orch = Orchestrator(provider, registry, session_store)
         session_id = session_store.create_session()
 
@@ -195,4 +217,74 @@ class TestOrchestrator:
         gen = await orch.handle_message(session_id, "Hi")
         events = await collect_events(gen)
 
+        assert any(isinstance(e, DoneEvent) for e in events)
+
+    @pytest.mark.asyncio
+    async def test_tool_chain_two_turns(self, session_store, registry):
+        """LLM calls tool in turn 1, then answers directly in turn 2 — loop exits cleanly."""
+        file_data = {"files": [{"name": "notes.txt", "path": "/home/notes.txt"}]}
+        registry.register(MockFileAgent(result_data=file_data))
+
+        tool_call = ToolCall(
+            id="call_001",
+            function={"name": "file_search", "arguments": '{"pattern": "notes.txt"}'},
+        )
+
+        call_count = 0
+
+        async def side_effect(messages, tools=None):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return ChatMessage(role="assistant", content=None, tool_calls=[tool_call])
+            return ChatMessage(role="assistant", content="Here is the file.")
+
+        provider = MockLLMProvider(
+            chat_response=ChatMessage(role="assistant", content=None, tool_calls=[tool_call]),
+            stream_tokens=["Here is the file."],
+        )
+        provider.chat_completion = side_effect
+
+        orch = Orchestrator(provider, registry, session_store)
+        session_id = session_store.create_session()
+        gen = await orch.handle_message(session_id, "find notes.txt")
+        events = await collect_events(gen)
+
+        status_events = [e for e in events if isinstance(e, AgentStatusEvent)]
+        assert any(e.status == "complete" for e in status_events)
+        # First call: tool detection; second call: re-call after tool result
+        assert call_count == 2
+        assert any(isinstance(e, DoneEvent) for e in events)
+
+    @pytest.mark.asyncio
+    async def test_max_iterations_guard(self, session_store, registry):
+        """Orchestrator stops after _MAX_TOOL_ITERATIONS and still emits DoneEvent."""
+        from app.core.orchestrator import _MAX_TOOL_ITERATIONS
+
+        tool_call = ToolCall(
+            id="call_loop",
+            function={"name": "file_search", "arguments": '{"pattern": "*.py"}'},
+        )
+        registry.register(MockFileAgent())
+
+        call_count = 0
+
+        async def always_tool(messages, tools=None):
+            nonlocal call_count
+            call_count += 1
+            return ChatMessage(role="assistant", content=None, tool_calls=[tool_call])
+
+        provider = MockLLMProvider(
+            chat_response=ChatMessage(role="assistant", content=None, tool_calls=[tool_call]),
+            stream_tokens=["done"],
+        )
+        provider.chat_completion = always_tool
+
+        orch = Orchestrator(provider, registry, session_store)
+        session_id = session_store.create_session()
+        gen = await orch.handle_message(session_id, "keep searching")
+        events = await collect_events(gen)
+
+        # Initial detection call + one re-call per iteration = _MAX_TOOL_ITERATIONS + 1 total
+        assert call_count == _MAX_TOOL_ITERATIONS + 1
         assert any(isinstance(e, DoneEvent) for e in events)

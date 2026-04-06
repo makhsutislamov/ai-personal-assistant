@@ -19,15 +19,22 @@ from app.models.schemas import (
 
 logger = logging.getLogger(__name__)
 
+_MAX_TOOL_ITERATIONS = 5
+
 _SYSTEM_PROMPT = """You are a helpful personal AI assistant running on the user's desktop.
+You have access to a set of tools that can interact with the user's system and retrieve information on their behalf.
 
-You have access to tools that can interact with the user's system.
-IMPORTANT: Only call a tool when the user's message explicitly asks you to search for or find files on their computer.
-Never call a tool for greetings, general questions, or any message that is not a clear file-search request.
-For casual conversation, questions, or anything unrelated to file searching, respond directly using your knowledge — do NOT invoke any tools.
+## Tool use
+- Before selecting a tool, reason briefly about which tool best matches the user's request.
+- You may call multiple tools in sequence if the task requires it (e.g., search for a file, then read its contents).
+- Each tool's description specifies exactly when to use it — follow those boundaries strictly.
+- If a tool returns an error or empty results, explain what happened and suggest what the user could try instead.
+- Never invoke a tool speculatively or to satisfy curiosity — only when the user's request clearly requires it.
 
-When you do use a tool, explain what you are doing and summarize the results clearly.
-Format file lists as markdown tables or bullet lists for readability."""
+## Responses
+- After using tools, synthesize the results into a clear, direct answer — don't just dump raw data.
+- Use markdown formatting (tables, bullet lists, code blocks) where it aids readability.
+- For conversational messages, general questions, or anything not requiring system access, respond directly without invoking any tools."""
 
 
 class Orchestrator:
@@ -85,70 +92,69 @@ class Orchestrator:
         response_msg: ChatMessage,
         messages: list[ChatMessage],
     ) -> AsyncIterator[StreamEvent]:
-        # Add the assistant's tool-call message to history
-        messages = messages + [response_msg]
+        # Multi-turn tool loop: re-call LLM after each round of tool results
+        # until it produces a plain response or _MAX_TOOL_ITERATIONS is reached.
+        tools = self._registry.as_tools()
+        iteration = 0
 
-        for tool_call in response_msg.tool_calls or []:
-            tool_name = tool_call.function.get("name", "")
-            agent = self._registry.get(tool_name)
+        while response_msg.tool_calls and iteration < _MAX_TOOL_ITERATIONS:
+            iteration += 1
+            messages = messages + [response_msg]
 
-            yield AgentStatusEvent(agent_name=tool_name, status="working")
+            for tool_call in response_msg.tool_calls or []:
+                tool_name = tool_call.function.get("name", "")
+                agent = self._registry.get(tool_name)
 
-            if agent is None:
-                error_content = f"Unknown tool: {tool_name}"
-                tool_result_msg = ChatMessage(
-                    role="tool",
-                    content=error_content,
-                    tool_call_id=tool_call.id,
-                )
-                messages = messages + [tool_result_msg]
-                yield AgentStatusEvent(agent_name=tool_name, status="error")
-                continue
+                yield AgentStatusEvent(agent_name=tool_name, status="working")
 
-            try:
-                # Parse arguments
-                args_raw = tool_call.function.get("arguments", "{}")
-                if isinstance(args_raw, str):
-                    parameters = json.loads(args_raw)
-                else:
-                    parameters = args_raw or {}
+                if agent is None:
+                    tool_result_msg = ChatMessage(
+                        role="tool",
+                        content=f"Unknown tool: {tool_name}",
+                        tool_call_id=tool_call.id,
+                    )
+                    messages = messages + [tool_result_msg]
+                    yield AgentStatusEvent(agent_name=tool_name, status="error")
+                    continue
 
-                agent_result = await agent.execute(parameters)
+                try:
+                    args_raw = tool_call.function.get("arguments", "{}")
+                    parameters = json.loads(args_raw) if isinstance(args_raw, str) else (args_raw or {})
 
-                yield AgentStatusEvent(agent_name=tool_name, status="complete")
-                yield AgentResultEvent(agent_name=tool_name, data=agent_result.data)
+                    agent_result = await agent.execute(parameters)
 
-                tool_result_msg = ChatMessage(
-                    role="tool",
-                    content=json.dumps(agent_result.data) if agent_result.data else agent_result.summary,
-                    tool_call_id=tool_call.id,
-                )
-                messages = messages + [tool_result_msg]
+                    yield AgentStatusEvent(agent_name=tool_name, status="complete")
+                    yield AgentResultEvent(agent_name=tool_name, data=agent_result.data)
 
-            except Exception as exc:
-                logger.exception("Error executing agent %s", tool_name)
-                tool_result_msg = ChatMessage(
-                    role="tool",
-                    content=f"Error executing {tool_name}: {exc}",
-                    tool_call_id=tool_call.id,
-                )
-                messages = messages + [tool_result_msg]
-                yield AgentStatusEvent(agent_name=tool_name, status="error")
+                    tool_result_msg = ChatMessage(
+                        role="tool",
+                        content=json.dumps(agent_result.data) if agent_result.data else agent_result.summary,
+                        tool_call_id=tool_call.id,
+                    )
+                    messages = messages + [tool_result_msg]
 
-        # Synthesis call — stream the final response
-        full_content = ""
-        try:
-            stream = await self._provider.chat_completion_stream(messages)
-            async for token in stream:
-                full_content += token
-                yield TokenEvent(content=token)
-        except Exception as exc:
-            logger.exception("Error streaming synthesis response")
-            yield ErrorEvent(code="stream_error", message=str(exc))
+                except Exception as exc:
+                    logger.exception("Error executing agent %s", tool_name)
+                    tool_result_msg = ChatMessage(
+                        role="tool",
+                        content=f"Error executing {tool_name}: {exc}",
+                        tool_call_id=tool_call.id,
+                    )
+                    messages = messages + [tool_result_msg]
+                    yield AgentStatusEvent(agent_name=tool_name, status="error")
 
-        if full_content:
-            assistant_msg = ChatMessage(role="assistant", content=full_content)
-            self._session_store.append_message(session_id, assistant_msg)
+            # Re-call LLM — it decides whether to invoke more tools or produce final answer
+            response_msg = await self._provider.chat_completion(messages, tools=tools or None)
+
+        if iteration >= _MAX_TOOL_ITERATIONS:
+            logger.warning(
+                "Max tool iterations (%d) reached for session %s", _MAX_TOOL_ITERATIONS, session_id
+            )
+
+        # Synthesis — delegate to _stream_direct; if response_msg already has content
+        # (LLM chose to answer without further tool calls) it yields that directly.
+        async for event in self._stream_direct(session_id, messages, response_msg):
+            yield event
 
     async def _stream_direct(
         self,
