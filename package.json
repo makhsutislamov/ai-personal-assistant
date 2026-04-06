@@ -1,0 +1,24 @@
+{
+  "name": "ai-personal-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1",
+    "dev:electron": "NODE_ENV=development electron .",
+    "build:electron": "npx tsc --project tsconfig.electron.json",
+    "build": "npm run build:electron && npm run build:frontend && npm run build:backend && electron-builder",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "bash scripts/build-backend.sh",
+    "test:backend": "cd backend && .venv/bin/pytest",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.2.2"
+  }
+}

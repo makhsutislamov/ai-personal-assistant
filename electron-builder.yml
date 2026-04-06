@@ -1,0 +1,46 @@
+appId: com.ai-personal-assistant.app
+productName: AI Personal Assistant
+copyright: Copyright © 2024 AI Personal Assistant
+
+directories:
+  output: dist-electron
+  buildResources: build
+
+files:
+  - electron/**/*.js
+  - "!electron/**/*.ts"
+  - frontend/dist/**/*
+  - package.json
+
+mac:
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+
+dmg:
+  contents:
+    - x: 410
+      y: 150
+      type: link
+      path: /Applications
+    - x: 130
+      y: 150
+      type: file
+
+extraResources:
+  - from: backend/dist/
+    to: backend/
+    filter:
+      - "**/*"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+publish: null
