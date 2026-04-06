@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT = """You are a helpful personal AI assistant running on the user's desktop.
 
-You have access to tools that can interact with the user's system. 
-When the user asks to find files, search for documents, or locate items on their computer, use the file_search tool.
-For all other questions, answer directly using your knowledge.
+You have access to tools that can interact with the user's system.
+IMPORTANT: Only call a tool when the user's message explicitly asks you to search for or find files on their computer.
+Never call a tool for greetings, general questions, or any message that is not a clear file-search request.
+For casual conversation, questions, or anything unrelated to file searching, respond directly using your knowledge — do NOT invoke any tools.
 
-When using tools, explain what you're doing and summarize the results in a clear, readable way.
+When you do use a tool, explain what you are doing and summarize the results clearly.
 Format file lists as markdown tables or bullet lists for readability."""
 
 
@@ -155,16 +156,14 @@ class Orchestrator:
         messages: list[ChatMessage],
         first_response: ChatMessage,
     ) -> AsyncIterator[StreamEvent]:
-        # If the non-streaming call returned content, stream it token by token
-        # Otherwise re-issue a streaming call
+        # If the non-streaming detection call already returned text, yield it directly
+        # to avoid a redundant second LLM round-trip.
+        # Otherwise re-issue a streaming call to get the response.
         full_content = ""
 
         if first_response.content:
-            # Re-stream the already-obtained response
-            stream = await self._provider.chat_completion_stream(messages)
-            async for token in stream:
-                full_content += token
-                yield TokenEvent(content=token)
+            full_content = first_response.content
+            yield TokenEvent(content=first_response.content)
         else:
             stream = await self._provider.chat_completion_stream(messages)
             async for token in stream:

@@ -108,8 +108,11 @@ class FileSearchAgent(BaseAgent):
         return AgentMetadata(
             name="file_search",
             description=(
-                "Search the local filesystem for files matching a name pattern or glob. "
-                "Use this when the user asks to find files by name."
+                "Search the local filesystem for files matching a name or glob pattern. "
+                "Only call this tool when the user explicitly asks to find, search for, or "
+                "locate files on their computer. "
+                "Do NOT call this tool for greetings, general questions, or any message "
+                "that does not clearly request a file search."
             ),
             parameters_schema={
                 "type": "object",
