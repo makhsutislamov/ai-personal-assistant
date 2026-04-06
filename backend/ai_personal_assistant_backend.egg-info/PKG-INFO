@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: ai-personal-assistant-backend
+Version: 0.1.0
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.128.0
+Requires-Dist: uvicorn[standard]>=0.34.0
+Requires-Dist: websockets>=14.2
+Requires-Dist: openai>=2.11.0
+Requires-Dist: ollama>=0.4.8
+Requires-Dist: platformdirs>=4.3.6
+Requires-Dist: pydantic>=2.11.1
+Requires-Dist: pydantic-settings>=2.8.1
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3.5; extra == "dev"
+Requires-Dist: pytest-asyncio>=1.0.0; extra == "dev"
+Requires-Dist: httpx>=0.28.1; extra == "dev"
+Requires-Dist: ruff>=0.11.6; extra == "dev"
+Requires-Dist: mypy>=1.15.0; extra == "dev"
