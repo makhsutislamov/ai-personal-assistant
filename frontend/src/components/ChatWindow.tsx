@@ -6,12 +6,13 @@ import { MessageBubble } from './MessageBubble'
 
 interface ChatWindowProps {
   backendUrl: string
+  authToken?: string
   onNewChat?: () => void
   newChatTrigger?: number
 }
 
-export function ChatWindow({ backendUrl, newChatTrigger }: ChatWindowProps) {
-  const { messages, isStreaming, activeAgent, error, sendMessage, startNewChat } = useChat(backendUrl)
+export function ChatWindow({ backendUrl, authToken, newChatTrigger }: ChatWindowProps) {
+  const { messages, isStreaming, activeAgent, error, sendMessage, startNewChat } = useChat(backendUrl, authToken)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

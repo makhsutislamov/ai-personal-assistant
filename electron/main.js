@@ -80,6 +80,18 @@ function createWindow(port) {
     });
 }
 electron_1.app.whenReady().then(async () => {
+    // Set Content-Security-Policy
+    electron_1.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        const csp = isDev
+            ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:* ws://localhost:* http://localhost:*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+            : "default-src 'self'; script-src 'self'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:";
+        callback({
+            responseHeaders: {
+                ...details.responseHeaders,
+                'Content-Security-Policy': [csp],
+            },
+        });
+    });
     try {
         console.log('[Main] Starting Python backend...');
         backendPort = await (0, python_manager_1.startPythonBackend)(authToken);

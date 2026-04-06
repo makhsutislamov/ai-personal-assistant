@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import AsyncIterator
 
@@ -22,7 +23,14 @@ def _to_ollama_messages(messages: list[ChatMessage]) -> list[dict]:
                 {
                     "id": tc.id,
                     "type": tc.type,
-                    "function": tc.function,
+                    "function": {
+                        "name": tc.function.get("name", ""),
+                        "arguments": (
+                            tc.function["arguments"]
+                            if isinstance(tc.function.get("arguments"), dict)
+                            else json.loads(tc.function.get("arguments") or "{}")
+                        ),
+                    },
                 }
                 for tc in msg.tool_calls
             ]
@@ -41,9 +49,9 @@ def _parse_message(msg: ollama.Message) -> ChatMessage:
                 function={
                     "name": tc.function.name if hasattr(tc, "function") else "",
                     "arguments": (
-                        str(tc.function.arguments)
+                        tc.function.arguments
                         if hasattr(tc, "function") and tc.function.arguments
-                        else "{}"
+                        else {}
                     ),
                 },
             )

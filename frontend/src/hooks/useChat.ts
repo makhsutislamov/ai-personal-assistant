@@ -23,7 +23,7 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-export function useChat(backendUrl: string): UseChatReturn {
+export function useChat(backendUrl: string, authToken?: string): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [activeAgent, setActiveAgent] = useState<ActiveAgent | null>(null)
@@ -37,10 +37,12 @@ export function useChat(backendUrl: string): UseChatReturn {
 
   const connect = useCallback((sid: string) => {
     if (wsRef.current) {
+      // Null out onclose before intentionally closing to prevent a spurious retry
+      wsRef.current.onclose = null
       wsRef.current.close()
     }
 
-    const ws = createChatWebSocket(sid)
+    const ws = createChatWebSocket(sid, authToken)
     wsRef.current = ws
 
     ws.onopen = () => {
@@ -109,7 +111,7 @@ export function useChat(backendUrl: string): UseChatReturn {
         }, delay)
       }
     }
-  }, [])
+  }, [authToken])
 
   const initSession = useCallback(async () => {
     try {

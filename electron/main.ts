@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, session } from 'electron'
 import * as path from 'path'
 import * as crypto from 'crypto'
 import { startPythonBackend, stopPythonBackend } from './python-manager'
@@ -52,6 +52,19 @@ function createWindow(port: number): void {
 }
 
 app.whenReady().then(async () => {
+  // Set Content-Security-Policy
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const csp = isDev
+      ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:* ws://localhost:* http://localhost:*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+      : "default-src 'self'; script-src 'self'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:*; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [csp],
+      },
+    })
+  })
+
   try {
     console.log('[Main] Starting Python backend...')
     backendPort = await startPythonBackend(authToken)
