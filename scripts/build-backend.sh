@@ -9,10 +9,10 @@ echo "[build-backend.sh] Building Python backend with PyInstaller..."
 # Activate virtual environment
 source "$BACKEND_DIR/.venv/bin/activate"
 
-# Install PyInstaller if not already present
+# Install PyInstaller if not already present (falls back for local dev outside CI)
 if ! python -m pyinstaller --version &>/dev/null 2>&1; then
   echo "[build-backend.sh] Installing PyInstaller..."
-  pip install pyinstaller
+  pip install 'pyinstaller>=6.0'
 fi
 
 cd "$BACKEND_DIR"
