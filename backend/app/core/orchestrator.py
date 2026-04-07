@@ -22,19 +22,24 @@ logger = logging.getLogger(__name__)
 _MAX_TOOL_ITERATIONS = 5
 
 _SYSTEM_PROMPT = """You are a helpful personal AI assistant running on the user's desktop.
-You have access to a set of tools that can interact with the user's system and retrieve information on their behalf.
+You have access to a set of tools that can interact with the user's system
+and retrieve information on their behalf.
 
 ## Tool use
 - Before selecting a tool, reason briefly about which tool best matches the user's request.
-- You may call multiple tools in sequence if the task requires it (e.g., search for a file, then read its contents).
+- You may call multiple tools in sequence if the task requires it
+  (e.g., search for a file, then read its contents).
 - Each tool's description specifies exactly when to use it — follow those boundaries strictly.
-- If a tool returns an error or empty results, explain what happened and suggest what the user could try instead.
-- Never invoke a tool speculatively or to satisfy curiosity — only when the user's request clearly requires it.
+- If a tool returns an error or empty results, explain what happened
+  and suggest what the user could try instead.
+- Never invoke a tool speculatively or to satisfy curiosity
+  — only when the user's request clearly requires it.
 
 ## Responses
 - After using tools, synthesize the results into a clear, direct answer — don't just dump raw data.
 - Use markdown formatting (tables, bullet lists, code blocks) where it aids readability.
-- For conversational messages, general questions, or anything not requiring system access, respond directly without invoking any tools."""
+- For conversational messages, general questions, or anything not requiring system access,
+  respond directly without invoking any tools."""
 
 
 class Orchestrator:
@@ -48,9 +53,7 @@ class Orchestrator:
         self._registry = registry
         self._session_store = session_store
 
-    async def handle_message(
-        self, session_id: str, content: str
-    ) -> AsyncIterator[StreamEvent]:
+    async def handle_message(self, session_id: str, content: str) -> AsyncIterator[StreamEvent]:
         return self._handle_message_gen(session_id, content)
 
     async def _handle_message_gen(
@@ -71,9 +74,7 @@ class Orchestrator:
 
             if response_msg.tool_calls:
                 # Tool calling path
-                async for event in self._handle_tool_calls(
-                    session_id, response_msg, messages
-                ):
+                async for event in self._handle_tool_calls(session_id, response_msg, messages):
                     yield event
             else:
                 # Direct text streaming path
@@ -119,7 +120,9 @@ class Orchestrator:
 
                 try:
                     args_raw = tool_call.function.get("arguments", "{}")
-                    parameters = json.loads(args_raw) if isinstance(args_raw, str) else (args_raw or {})
+                    parameters = (
+                        json.loads(args_raw) if isinstance(args_raw, str) else (args_raw or {})
+                    )
 
                     agent_result = await agent.execute(parameters)
 
@@ -128,7 +131,9 @@ class Orchestrator:
 
                     tool_result_msg = ChatMessage(
                         role="tool",
-                        content=json.dumps(agent_result.data) if agent_result.data else agent_result.summary,
+                        content=json.dumps(agent_result.data)
+                        if agent_result.data
+                        else agent_result.summary,
                         tool_call_id=tool_call.id,
                     )
                     messages = messages + [tool_result_msg]
