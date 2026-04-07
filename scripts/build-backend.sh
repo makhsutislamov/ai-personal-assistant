@@ -10,7 +10,7 @@ echo "[build-backend.sh] Building Python backend with PyInstaller..."
 source "$BACKEND_DIR/.venv/bin/activate"
 
 # Install PyInstaller if not already present
-if ! python -m pyinstaller --version &>/dev/null; then
+if ! python -m pyinstaller --version &>/dev/null 2>&1; then
   echo "[build-backend.sh] Installing PyInstaller..."
   pip install pyinstaller
 fi
