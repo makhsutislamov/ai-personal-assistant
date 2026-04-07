@@ -1,7 +1,5 @@
 import stat
 
-import pytest
-
 from app.core.config import ConfigManager
 from app.models.schemas import AzureOpenAISettings, OllamaSettings, SettingsSchema
 

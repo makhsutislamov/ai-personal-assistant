@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import logging
-from copy import deepcopy
 
 from fastapi import APIRouter, HTTPException
 
-from app.models.schemas import ProviderStatus, ProvidersStatusResponse, SettingsSchema
+from app.models.schemas import ProvidersStatusResponse, ProviderStatus, SettingsSchema
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +13,6 @@ router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 @router.get("", response_model=SettingsSchema)
 async def get_settings(request=None):
-    from app.main import get_app_state
-    from fastapi import Request
 
     # Accept either direct call or via dependency injection
     return _get_state(request).config_manager.load()
@@ -23,7 +20,6 @@ async def get_settings(request=None):
 
 @router.put("", response_model=SettingsSchema)
 async def update_settings(new_settings: SettingsSchema, request=None):
-    from app.main import get_app_state
     from app.llm.factory import create_provider
 
     state = _get_state(request)
@@ -40,8 +36,8 @@ async def update_settings(new_settings: SettingsSchema, request=None):
 
 @router.get("/providers/status", response_model=ProvidersStatusResponse)
 async def providers_status(request=None):
-    from app.llm.ollama_provider import OllamaProvider
     from app.llm.azure_openai_provider import AzureOpenAIProvider
+    from app.llm.ollama_provider import OllamaProvider
 
     state = _get_state(request)
     settings = state.config_manager.load()

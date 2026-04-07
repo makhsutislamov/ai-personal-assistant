@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from app.agents.apple_notes import (
-    AppleNotesReadAgent,
-    AppleNotesSearchAgent,
     _FIELD_SEP,
     _RECORD_SEP,
+    AppleNotesReadAgent,
+    AppleNotesSearchAgent,
     _sanitize,
 )
 

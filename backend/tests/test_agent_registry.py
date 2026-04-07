@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import pytest
-
 from app.agents.base import AgentMetadata, AgentResult, BaseAgent
 from app.agents.registry import AgentRegistry
 
@@ -23,7 +21,9 @@ class MockAgent(BaseAgent):
         )
 
     async def execute(self, parameters: dict[str, Any]) -> AgentResult:
-        return AgentResult(success=True, data={"query": parameters.get("query")}, summary="Mock result")
+        return AgentResult(
+            success=True, data={"query": parameters.get("query")}, summary="Mock result"
+        )
 
 
 class TestAgentRegistry:
@@ -64,7 +64,11 @@ class TestAgentRegistry:
     def test_register_multiple_agents(self):
         class AnotherAgent(BaseAgent):
             def metadata(self):
-                return AgentMetadata(name="another", description="Another", parameters_schema={"type": "object", "properties": {}})
+                return AgentMetadata(
+                    name="another",
+                    description="Another",
+                    parameters_schema={"type": "object", "properties": {}},
+                )
             async def execute(self, parameters):
                 return AgentResult(success=True, data={}, summary="")
 

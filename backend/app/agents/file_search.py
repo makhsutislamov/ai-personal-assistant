@@ -4,7 +4,6 @@ import asyncio
 import fnmatch
 import os
 import sys
-import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -90,7 +89,7 @@ def _search_sync(pattern: str, directory: str, max_results: int) -> SearchResult
                                 )
                     except (PermissionError, OSError):
                         pass
-        except PermissionError as exc:
+        except PermissionError:
             result.directories_skipped += 1
             result.skipped_reasons.append(f"Permission denied: {current_dir}")
         except OSError as exc:
@@ -111,8 +110,10 @@ class FileSearchAgent(BaseAgent):
                 "Search the local filesystem for files by name or glob pattern. "
                 "Use for requests like: 'find my resume', 'where is config.json', "
                 "'list all *.py files in ~/projects', 'search for notes.txt'. "
-                "Do NOT call for general questions, greetings, or anything unrelated to locating files. "
-                "Do NOT use pattern '*' with directory '/' — require a specific directory for broad patterns. "
+                "Do NOT call for general questions, greetings, "
+                "or anything unrelated to locating files. "
+                "Do NOT use pattern '*' with directory '/' "
+                "— require a specific directory for broad patterns. "
                 "Returns file name, full path, size in bytes, and last-modified timestamp."
             ),
             parameters_schema={
@@ -128,7 +129,8 @@ class FileSearchAgent(BaseAgent):
                     "directory": {
                         "type": "string",
                         "description": (
-                            "Root directory to search from. Defaults to the user home directory '~'. "
+                            "Root directory to search from. "
+                            "Defaults to the user home directory '~'. "
                             "Use '/' to search the entire filesystem."
                         ),
                     },

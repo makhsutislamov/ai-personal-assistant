@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from app.agents.registry import AgentRegistry
 from app.core.session import SessionStore

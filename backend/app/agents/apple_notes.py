@@ -50,10 +50,13 @@ class AppleNotesSearchAgent(BaseAgent):
             name="apple_notes_search",
             description=(
                 "Search the user's Apple Notes for notes matching a query. "
-                "Use for requests like: 'find my notes about project X', 'what did I write about the meeting', "
+                "Use for requests like: 'find my notes about project X', "
+                "'what did I write about the meeting', "
                 "'search my notes for recipe ideas', 'do I have any notes on topic Y'. "
-                "Returns note titles, folders, modification dates, and a short text snippet per result. "
-                "To read the full content of a specific note, use apple_notes_read with the note_id from results. "
+                "Returns note titles, folders, modification dates, "
+                "and a short text snippet per result. "
+                "To read the full content of a specific note, "
+                "use apple_notes_read with the note_id from results. "
                 "Do NOT call for general questions unrelated to the user's personal Apple Notes. "
                 "macOS only — returns an error on other platforms."
             ),
@@ -85,7 +88,8 @@ class AppleNotesSearchAgent(BaseAgent):
         script = f"""tell application "Notes"
     set fs to ASCII character 31
     set rs to ASCII character 30
-    set matchingNotes to notes whose plaintext contains "{safe_query}" or name contains "{safe_query}"
+    set matchingNotes to notes whose plaintext contains "{safe_query}"
+    set matchingNotes to matchingNotes & (notes whose name contains "{safe_query}")
     set noteCount to count of matchingNotes
     set lim to {self._max_results}
     if noteCount < lim then set lim to noteCount
@@ -100,7 +104,8 @@ class AppleNotesSearchAgent(BaseAgent):
             set noteFolder to name of container of aNote
         end try
         set noteMod to (modification date of aNote) as string
-        set output to output & noteId & fs & noteTitle & fs & noteBody & fs & noteFolder & fs & noteMod & rs
+        set output to output & noteId & fs & noteTitle & fs
+        set output to output & noteBody & fs & noteFolder & fs & noteMod & rs
     end repeat
     return output
 end tell"""
@@ -181,7 +186,8 @@ class AppleNotesReadAgent(BaseAgent):
             description=(
                 "Read the full plain-text content of a specific Apple Note by its ID. "
                 "Use after apple_notes_search when you need the complete note body. "
-                "The note_id must come from a previous apple_notes_search result — do NOT guess or construct IDs. "
+                "The note_id must come from a previous apple_notes_search result "
+                "— do NOT guess or construct IDs. "
                 "macOS only — returns an error on other platforms."
             ),
             parameters_schema={
