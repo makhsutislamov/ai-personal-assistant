@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-
 from app.agents.base import AgentMetadata, BaseAgent
 
 

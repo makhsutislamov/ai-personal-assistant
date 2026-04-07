@@ -1,7 +1,5 @@
 import uuid
 
-import pytest
-
 from app.core.session import SessionStore
 from app.models.schemas import ChatMessage
 

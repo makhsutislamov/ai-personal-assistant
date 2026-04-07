@@ -13,7 +13,6 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 @router.post("", response_model=SessionResponse)
 async def create_session(request=None):
-    from app.main import get_app_state
 
     state = _get_state(request)
     session_id = state.session_store.create_session()
@@ -22,7 +21,6 @@ async def create_session(request=None):
 
 @router.delete("/{session_id}", status_code=200)
 async def delete_session(session_id: str, request=None):
-    from app.main import get_app_state
 
     state = _get_state(request)
     if not state.session_store.session_exists(session_id):

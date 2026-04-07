@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agents.apple_notes import AppleNotesReadAgent, AppleNotesSearchAgent
 from app.agents.file_search import FileSearchAgent
 from app.agents.registry import AgentRegistry
 from app.core.config import ConfigManager
@@ -51,6 +52,8 @@ async def lifespan(app: FastAPI):
     session_store = SessionStore()
     registry = AgentRegistry()
     registry.register(FileSearchAgent())
+    registry.register(AppleNotesSearchAgent())
+    registry.register(AppleNotesReadAgent())
     orchestrator = Orchestrator(provider, registry, session_store)
     auth_token = os.environ.get("AUTH_TOKEN")
 

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+
 import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from typing import AsyncIterator
 
 from app.agents.registry import AgentRegistry
 from app.core.config import ConfigManager
@@ -11,7 +11,7 @@ from app.core.orchestrator import Orchestrator
 from app.core.session import SessionStore
 from app.llm.base import BaseLLMProvider
 from app.main import AppState, create_app
-from app.models.schemas import ChatMessage, SettingsSchema
+from app.models.schemas import ChatMessage
 
 
 class MockProvider(BaseLLMProvider):

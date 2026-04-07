@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
-from typing import Any, AsyncIterator
-from unittest.mock import AsyncMock, MagicMock
+from collections.abc import AsyncIterator
 
 import pytest
 
@@ -16,11 +14,9 @@ from app.models.schemas import (
     AgentStatusEvent,
     ChatMessage,
     DoneEvent,
-    ErrorEvent,
     TokenEvent,
     ToolCall,
 )
-
 
 # ---------------------------------------------------------------------------
 # Test helpers

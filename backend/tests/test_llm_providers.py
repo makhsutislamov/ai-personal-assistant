@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
-from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import AsyncIterator
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -14,7 +14,6 @@ from app.models.schemas import (
     OllamaSettings,
     SettingsSchema,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
