@@ -10,6 +10,8 @@ dist/
 dist-electron/
 frontend/dist/
 backend/dist/
+backend/build/
+backend/backend.spec
 *.pyc
 __pycache__/
 *.egg-info/
